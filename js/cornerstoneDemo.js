@@ -27,6 +27,8 @@ $.getJSON('studyList.json', function(data) {
     // Append the row to the study list
     var studyRowElement = $(studyRow).appendTo('#studyListData');
 
+    g_studyRowElement = studyRowElement;
+
     // On study list row click
     $(studyRowElement).click(function() {
 
@@ -55,8 +57,36 @@ $.getJSON('studyList.json', function(data) {
         $(window).trigger('resize');
       });
 
+      console.log(studyViewerCopy);
+      console.log(viewportTemplate);
+
       // Now load the study.json
       loadStudy(studyViewerCopy, viewportTemplate, study.studyId + ".json");
+
+
+      // var context = document.getElementById("mainCanvas").getContext('2d');;
+
+      // var viewport = cornerstone.getViewport(g_context.canvas.parentElement);
+      // viewport.scale= evt.scale;
+
+
+    if($("#presenter").is(":checked")){
+          console.log("sending request to load study");
+
+                socket.emit('loadStudy',{
+                  studyViewerCopy: studyViewerCopy, 
+                  viewportTemplate: viewportTemplate, 
+                  study: study.studyId + ".json",
+                  studyRowElement: g_studyRowElement,
+                  webSocketId: socket.webSocketId,
+                  patientId: study.patientId,
+
+                });
+        }
+
+    //TODO: Set zoom to fix annotation issues
+
+
     });
   });
 });

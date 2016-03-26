@@ -210,4 +210,42 @@ function loadStudy(studyViewer, viewportModel, studyId) {
             useItemStack(0, 0);
 
     });
+
+
+
+  setTimeout(function(){
+
+        $('canvas').last().prop('id','mainCanvas');
+        console.log("canvas id set To mainCanvas");
+
+    },1000);
+
+
+  if($("#presenter").is(":checked")){
+
+
+  setTimeout(function(){
+
+      //  alert("going to put event listener on canvas");
+
+
+      //  $('canvas').last().off();
+
+        //mousemove mouseup event is creating too many events
+        $('canvas').last().on('mousedown  ',function(evt){
+
+            console.log("mouse event",evt);
+
+      //          socket.emit('emulateMouseEvent',{
+      //            mouseEvent: evt, 
+      //            webSocketId: socket.webSocketId
+      //          });
+        });
+    },1000);
+
+
+
+    }
+
+
 }

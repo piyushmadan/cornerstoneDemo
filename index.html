@@ -23,8 +23,20 @@
   <link href="css/cornerstoneDemo.css" rel="stylesheet">
 </head>
 
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="js/websocket.js"></script>
 <body>
-  <div id="wrap">
+
+    <ul id="messages" style="float:right; width:20%; height:10%">
+      <input id="m" autocomplete="off" /><button id="sent_chat">Send</button>
+    <div id="client_count"> </div>
+<input type="checkbox" id="presenter" >I'm presenter<br>
+    </ul>
+
+
+  <div id="wrap" style="width:80%">
 
     <!-- Nav bar -->
     <nav class="myNav navbar navbar-default" role="navigation">

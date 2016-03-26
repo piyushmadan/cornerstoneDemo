@@ -3,7 +3,69 @@ function setupButtons(studyViewer) {
     // Get the button elements
     var buttons = $(studyViewer).find('button');
 
+    g_buttons = buttons;
     // Tool button event handlers that set the new active tool
+
+    g_actions = new Array();
+    g_events = new Array();
+    
+    // Socket IO 
+    g_buttons.on('click touchstart',function(evt){
+
+    console.log("caught it for socket..");
+    console.log(arguments);
+
+
+    g_actions.push(evt.target);
+    g_events.push(evt);
+
+    console.log(evt.target["className"]);
+
+
+
+
+
+
+    //check if presenter, then broadcast event
+    if($("#presenter").is(":checked")){
+
+
+
+    
+             for(i=0;i<g_buttons.length;i++){
+                // Button is inside a span, sometimes span is main node, so checking on both
+                if(evt.target == g_buttons[i] || evt.target.parentNode == g_buttons[i]){
+                    console.log("evt.target == g_buttons[i]")
+                    console.log(i);
+        //            socket.broadcast.emit('buttonPressed',i);
+        
+
+                    socket.emit('buttonPressed',{
+                     webSocketId: socket.webSocketId,
+                     buttonNumber:  i
+                    });
+                    break;
+                } 
+                if(i==g_buttons.length) {
+                    console.log("no button matched");
+                    console.log(evt.target);
+                    console.log(g_buttons[i])
+                }
+            }           
+   
+
+
+
+
+
+
+
+    }
+
+});
+
+
+
 
     // WW/WL
     $(buttons[0]).on('click touchstart', function() {
