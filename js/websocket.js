@@ -7,14 +7,27 @@ socket.appConfig = {
 
 }
 
-$('form').submit(function(){
-socket.emit('chat message', $('#m').val());
-$('#m').val('');
-return false;
+//$('form').submit(function(){
+$(document).ready(function(){
+
+$('#sent_chat').on('click', function(){  
+  console.log("got msg");
+  socket.emit('chat message', $('#m').val());
+  $('#messages').append($('<li>').text($('#m').val()));
+  $('#m').val('');
+
+  return false;
 });
+
+
 socket.on('chat message', function(msg){
-$('#messages').append($('<li>').text(msg));
+  console.log("got msg");
+  $('#messages').append($('<li>').text(msg));
 });
+
+
+});
+
 
 
 socket.webSocketId = Math.ceil(Math.random()*10000);
@@ -25,13 +38,13 @@ socket.webSocketId = Math.ceil(Math.random()*10000);
 
 
 
-socket.on('news', function (data) {
-console.log(data);
-socket.emit('my other event', { my: 'data' });
-});
+// socket.on('news', function (data) {
+// console.log(data);
+// socket.emit('my other event', { my: 'data' });
+// });
 
 
-socket.emit('chat message', "hi");
+//socket.emit('chat message', "hi");
 
 
 socket.on('connect', function(){
