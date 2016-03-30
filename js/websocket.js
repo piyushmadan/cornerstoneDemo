@@ -164,17 +164,90 @@ var actionOnCanvas = function(evt) {
 
         context.fillRect(evt.x, evt.y - fontSize, width + (padding * 2), fontSize + (padding * 2));
         // Draw the text
-        context.fillStyle = color;
+        context.fillStyle = evt.color;
         context.fillText(evt.text, evt.x + padding, evt.y - fontSize + padding);
 
               break;
           case 'drawArrow':
-                cornerstoneTools.drawArrow(context, evt.start, evt.end, evt.color, evt.lineWidth)
+//                context.save();
+                cornerstoneTools.drawArrow(g_context, evt.start, evt.end, evt.color, evt.lineWidth)
               break;
           case 'drawHandles':
-                break;
-                  cornerstoneTools.drawHandles(g_context, evt.eventData, evt.handles, evt.color);
+                context.save();
+                context.strokeStyle = evt.color;
+                var viewport = cornerstone.getViewport(g_context.canvas.parentElement);
+                var handleRadius = 6/viewport.scale;
+
+                Object.keys(evt.handles).forEach(function(name) {
+                    var handle = evt.handles[name];
+                    context.beginPath();
+
+                    if (handle.active) {
+                        context.lineWidth = cornerstoneTools.toolStyle.getActiveWidth();
+                    } else {
+                        context.lineWidth = cornerstoneTools.toolStyle.getToolWidth();
+                    }
+  
+                    context.lineWidth  = context.lineWidth/viewport.scale;
+                    context.arc(handle.x, handle.y, handleRadius, 0, 2 * Math.PI);
+
+                    if (evt.fill) {
+                        context.fillStyle = evt.fill;
+                        context.fill();
+                    }
+
+                    context.stroke();
+                });
               break;
+
+         case 'drawRect': 
+            context.save();
+            var viewport = cornerstone.getViewport(g_context.canvas.parentElement);
+            var handleRadius = 6;
+
+            var widthCanvas = Math.abs(evt.data.handles.start.x - evt.data.handles.end.x);
+            var heightCanvas = Math.abs(evt.data.handles.start.y - evt.data.handles.end.y);
+            var leftCanvas = Math.min(evt.data.handles.start.x, evt.data.handles.end.x);
+            var topCanvas = Math.min(evt.data.handles.start.y, evt.data.handles.end.y);
+            var centerX = (evt.data.handles.start.x + evt.data.handles.end.x) / 2;
+            var centerY = (evt.data.handles.start.y + evt.data.handles.end) / 2;
+
+            context.beginPath();
+            context.strokeStyle = evt.color;
+            context.lineWidth = evt.lineWidth/viewport.scale;
+            context.rect(leftCanvas, topCanvas, widthCanvas, heightCanvas);
+            context.stroke();
+         break;
+         case 'drawLine': 
+
+            context.save();
+            var viewport = cornerstone.getViewport(g_context.canvas.parentElement);
+
+            // configurable shadow
+            if (evt.config && evt.config.shadow) {
+                context.shadowColor = '#000000';
+                context.shadowOffsetX = +1;
+                context.shadowOffsetY = +1;
+            }
+              
+            if (evt.data.active) {
+               var color = cornerstoneTools.toolColors.getActiveColor();
+            } else {
+               var color = cornerstoneTools.toolColors.getToolColor();
+            }
+
+            context.beginPath();
+            context.strokeStyle = color;
+            context.lineWidth = evt.lineWidth / viewport.scale;
+            context.moveTo(evt.data.handles.start.x, evt.data.handles.start.y);
+            context.lineTo(evt.data.handles.end.x, evt.data.handles.end.y);
+            if(evt.data.handles.start2 && evt.data.handles.end2){
+              context.moveTo(evt.data.handles.start2.x, evt.data.handles.start2.y);
+              context.lineTo(evt.data.handles.end2.x, evt.data.handles.end2.y);
+            }
+            context.stroke();
+            break;
+
 
           case 'drawEllipse':
         //          cornerstoneTools.drawEllipse(g_context, evt.x, evt.y, evt.w, evt.h);
@@ -182,16 +255,16 @@ var actionOnCanvas = function(evt) {
           evt.w = evt.w /viewport.scale;
           evt.h = evt.h /viewport.scale;
 
-              var lineWidth = cornerstoneTools.toolStyle.getToolWidth();
+              var lineWidth = cornerstoneTools.toolStyle.getToolWidth() /viewport.scale;
+              var  color = cornerstoneTools.toolColors.getToolColor();
 
-               var  color = cornerstoneTools.toolColors.getToolColor();
 
                   context.beginPath();
                   context.strokeStyle = color;
                   context.lineWidth = lineWidth;
                   cornerstoneTools.drawEllipse(context, evt.x, evt.y, evt.w, evt.h);
                   context.closePath();
-                  context.save();
+          //        context.save();
 
               var kappa = 0.5522848,
                   ox = (evt.w / 2) * kappa, // control point offset horizontal
@@ -213,28 +286,6 @@ var actionOnCanvas = function(evt) {
           default:
               console.log("default in eventType");
       }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      //  g_context.restore();
-
-
-
-
-
-
-
 }
 
         // color shows if data.active or not...
@@ -281,6 +332,13 @@ socket.on('drawEllipse',function(evt){
   actionOnCanvas(evt);
 });
 
+socket.on('drawLine',function(evt){
+  actionOnCanvas(evt);
+});
+
+socket.on('drawRect',function(evt){
+  actionOnCanvas(evt);
+});
 
 socket.on('wwwc',function(evt){
   actionOnCanvas(evt);
@@ -289,128 +347,6 @@ socket.on('wwwc',function(evt){
 socket.on('zoom',function(evt){
   actionOnCanvas(evt);
 });
-
-
-
-// socket.on('drawArrow',function(evt){
-
-//     console.log("emulating to drawArrow event");
-//     console.log("************************");
-//     console.log(evt);
-//     console.log("************************");
-
-//     if(socket.webSocketId!=evt.webSocketId){
-
-//         var color = cornerstoneTools.toolColors.getActiveColor();
-//         var font = cornerstoneTools.textStyle.getFont();
-//         var fontHeight = cornerstoneTools.textStyle.getFontSize();
-
-//         // because I'm unable to handle clearing canvas, I'm printing on when white / ToolColor is detected
-
-//         var g_context = document.getElementById("mainCanvas").getContext('2d');;
-
-//      //   if(evt.color==cornerstoneTools.toolColors.getToolColor()){
-//           cornerstoneTools.drawArrow(g_context, evt.start, evt.end, evt.color, evt.lineWidth)
-//      //   }
-
-//       console.log("different client... can emulate ")
-
-//     } else {
-//       console.log("same client... no need to emulate ")
-//     }
-
-
-// });
-
-// // TODO: combine drawArrow, drawPixelProbe,etc in one function
-
-
-// socket.on('drawHandles',function(evt){
-
-//     console.log("emulating to drawHandles event");
-//     console.log("************************");
-//     console.log(evt);
-//     console.log("************************");
-
-//     if(socket.webSocketId!=evt.webSocketId){
-
-//         var color = cornerstoneTools.toolColors.getActiveColor();
-//         var font = cornerstoneTools.textStyle.getFont();
-//         var fontHeight = cornerstoneTools.textStyle.getFontSize();
-
-//         // because I'm unable to handle clearing canvas, I'm printing on when white / ToolColor is detected
-
-
-//         if(evt.color==cornerstoneTools.toolColors.getToolColor()){
-
-//         var g_context = document.getElementById("mainCanvas").getContext('2d');;
-
-// //            cornerstoneTools.drawHandles(g_context, evt.eventData, evt.handles, evt.color);
-//         }
-
-//       console.log("different client... can emulate ")
-
-//     } else {
-//       console.log("same client... no need to emulate ")
-//     }
-
-
-// });
-
-
-
-
-// socket.on('drawEllipse',function(evt){
-
-//     console.log("emulating to drawEllipse event");
-//     console.log("************************");
-//     console.log(evt);
-//     console.log("************************");
-
-//     if(socket.webSocketId!=evt.webSocketId){
-
-//         var color = cornerstoneTools.toolColors.getActiveColor();
-//         var font = cornerstoneTools.textStyle.getFont();
-//         var fontHeight = cornerstoneTools.textStyle.getFontSize();
-
-//         // because I'm unable to handle clearing canvas, I'm printing on when white / ToolColor is detected
-
-//         var context = document.getElementById("mainCanvas").getContext('2d');;
-
-//         g_context = context;
-
-//         var lineWidth = cornerstoneTools.toolStyle.getToolWidth();
-//          var       color = cornerstoneTools.toolColors.getToolColor();
-
-
-//             context.beginPath();
-//             context.strokeStyle = color;
-//             context.lineWidth = lineWidth;
-
-
-
-//     //    if(evt.color==cornerstoneTools.toolColors.getToolColor()){
-//       //    cornerstoneTools.drawArrow(g_context, evt.start, evt.end, evt.color, evt.lineWidth)
-//             cornerstoneTools.drawEllipse(context, evt.x, evt.y, evt.w, evt.h);
-//      //   }
-
-//             context.closePath();
-
-//       console.log("different client... can emulate ")
-
-//     } else {
-//       console.log("same client... no need to emulate ")
-//     }
-
-
-// });
-
-
-
-
-
-
-
 
 
 
